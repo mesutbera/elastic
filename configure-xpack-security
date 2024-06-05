@@ -1,0 +1,59 @@
+Configure X-PACK Security
+
+Stop Kibana & Elasticsearch
+
+1. Stop Kibana
+sudo systemctl stop kibana
+
+2. Stop elasticsearch
+sudo systemctl stop elasticsearch
+
+
+3. Enable xpack in elasticsearch.yml
+sudo nano /etc/elasticsearch/elasticsearch.yml
+xpack.security.enabled: true
+
+sudo systemctl start elasticsearch
+
+
+
+4. Setup default user passwords
+cd /usr/share/elasticsearch/bin
+sudo ./elasticsearch-setup-passwords auto
+
+System Passwords
+Yukaridaki komutu calistirinca bize 6 tane sifre verecek, bunlar 
+Changed password for user apm_system
+Changed password for user kibana
+Changed password for user logstash_system
+Changed password for user beats_system
+Changed password for user remote_monitoring_user
+Changed password for user elastic
+Sifreleri güvenli bir yere not et.
+<< Default user passwords go here >>
+
+
+Simdi su komut ile sifre degistikten sonraki health durumunu görelim. Bu komut calisinca heath durumunun 401 hata verdigini görüyoruz.
+curl -XGET http://localhost:9200/_cluster/health?pretty
+
+curl -XGET -u elastic:az_önce_yukaridaki_komutlae_lasticicin_üretilen_sifre http://localhost:9200/_cluster/health?pretty
+Bu komut calisinca heath durumunun green verdigini görüyoruz.
+
+
+
+5. Configure kibana.yml
+
+### Elasticsearch authentication
+elasticsearch.username: "kibana"
+elasticsearch.password: "new_password"  <<>Buraya da yine yukarida ürettigimiz sifreyi girelim.>
+Dosyayi kaydet ve kibanayi baslat 
+sudo systemctl sart kibana
+
+
+### Security audit events
+xpack.security.audit.enabled: true
+
+###Idle timeout setting
+xpack.security.session.idleTimeout: 30m
+
+6. Login as elastic and configure a new admin user
